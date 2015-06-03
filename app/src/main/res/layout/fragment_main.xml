@@ -14,7 +14,9 @@
         android:id="@+id/artist_search_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="#D119FF"/>
+        android:textColorHint="#D119FF"
+        android:singleLine="true"
+        android:hint="@string/search_hint"/>
 
     <ListView
         android:layout_width="match_parent"
