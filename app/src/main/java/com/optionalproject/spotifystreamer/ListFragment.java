@@ -1,13 +1,19 @@
 package com.optionalproject.spotifystreamer;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -51,15 +57,27 @@ import java.util.List;
         ArtistListAdapter artistAdapter =
                 new ArtistListAdapter(getActivity(), data, R.drawable.greenday_xxxhdpi);
 
-//        mArtistAdapter =
-//                new ArrayAdapter<String>(
-//                        getActivity(), // The current context (this activity)
-//                        R.layout.result_list_item, // The name of the layout ID.
-//                        R.id.name_artist_textview, // The ID of the textview to populate.
-//                        artistArray);
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView)rootView.findViewById(R.id.artist_listview);
+        final EditText editText = (EditText)rootView.findViewById(R.id.artist_search_text);
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    Toast.makeText(getActivity(), v.getText(), Toast.LENGTH_SHORT).show();
+                    InputMethodManager inputManager
+                            = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+                    handled = true;
+
+                    // search pressed and perform your functionality.
+                }
+
+                return handled;
+            }
+        });
 
         listView.setAdapter(artistAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
