@@ -8,19 +8,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 public class ArtistListAdapter extends ArrayAdapter<String> {
 
     private final Activity context;
     private final String[] artistName;
-    private final Integer ArtistImage;
 
-    public ArtistListAdapter(Activity context, String[] artistName, Integer ArtistImage) {
+    public ArtistListAdapter(Activity context, String[] artistName) {
         super(context, R.layout.result_list_item, artistName);
         // TODO Auto-generated constructor stub
 
         this.context = context;
         this.artistName = artistName;
-        this.ArtistImage = ArtistImage;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ArtistListAdapter extends ArrayAdapter<String> {
         ImageView imageView = (ImageView) rowView.findViewById(R.id.image_list_result);
 
         txtTitle.setText(artistName[position]);
-        imageView.setImageResource(ArtistImage);
+        Picasso.with(context).load(R.drawable.greenday_xxxhdpi).into(imageView);
 
         return rowView;
     }
