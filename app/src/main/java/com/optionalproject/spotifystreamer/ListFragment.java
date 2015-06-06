@@ -25,6 +25,7 @@ public class ListFragment extends Fragment{
 
     ListView listView;
     ArtistListAdapter mArtistAdapter;
+    InputMethodManager inputManager;
 
     public ListFragment() {
     }
@@ -33,6 +34,7 @@ public class ListFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                final Bundle savedInstanceState) {
 
+        inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = (ListView)rootView.findViewById(R.id.artist_listview);
         EditText editText = (EditText)rootView.findViewById(R.id.artist_search_text);
@@ -43,9 +45,8 @@ public class ListFragment extends Fragment{
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     ArtistSearchTask searchTask = new ArtistSearchTask();
                     searchTask.execute(v.getText().toString());
+
                     //Minimize the softkeyboard to view list
-                    InputMethodManager inputManager
-                            = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
                             InputMethodManager.HIDE_NOT_ALWAYS);
                     handled = true;
@@ -54,12 +55,12 @@ public class ListFragment extends Fragment{
             }
         });
 
-
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(getActivity(), ("Clicked on position " + position), Toast.LENGTH_SHORT).show();
+                inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
 
@@ -68,34 +69,47 @@ public class ListFragment extends Fragment{
         return rootView;
     }
 
-        public class ArtistSearchTask extends AsyncTask<String, Void, String[]> {
+        public class ArtistSearchTask extends AsyncTask<String, Void, Object> {
 
             @Override
-            protected String[] doInBackground(String... params) {
+            protected Object doInBackground(String... params) {
 
                 if (params.length == 0) {
                     return null;
                 }
-
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
                 ArtistsPager results = spotify.searchArtists(params[0]);
 
-                int resultSize = results.artists.items.size();
-
-                String[] ArtistSearchResult = new String[resultSize];
-                for(int i = 0; i < resultSize; i++){
-                    ArtistSearchResult[i] = results.artists.items.get(i).name;
-                }
-
-                return ArtistSearchResult;
+                return results;
             }
 
             @Override
-            protected void onPostExecute(String[] strings) {
-                super.onPostExecute(strings);
-                mArtistAdapter = new ArtistListAdapter(getActivity(), strings);
-                listView.setAdapter(mArtistAdapter);
+            protected void onPostExecute(Object artistsPager) {
+                super.onPostExecute(artistsPager);
+
+                ArtistsPager artistResult = (ArtistsPager) artistsPager;
+
+                int size = artistResult.artists.items.size();
+                if(size > 0){
+                    String[] artistName = new String[size];
+                    String[] artistAlbumArt = new String[size];
+                    for(int i = 0; i < size; i ++){
+                        artistName[i] = artistResult.artists.items.get(i).name;
+                        if(artistResult.artists.items.get(i).images.size() != 0){
+                            artistAlbumArt[i] = artistResult.artists.items.get(i).images.get(0).url;
+                        }
+                        else {
+                            artistAlbumArt[i] = null;
+                        }
+                    }
+                    mArtistAdapter = new ArtistListAdapter(getActivity(), artistName, artistAlbumArt);
+                    listView.setAdapter(mArtistAdapter);
+                }
+                else{
+                    Toast.makeText(getActivity(),"No artists found", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
         }
-    }
+}
