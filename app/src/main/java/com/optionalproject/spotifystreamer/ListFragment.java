@@ -2,6 +2,7 @@ package com.optionalproject.spotifystreamer;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -26,6 +27,8 @@ public class ListFragment extends Fragment{
     ListView listView;
     ArtistListAdapter mArtistAdapter;
     InputMethodManager inputManager;
+    String[] artist_ID;
+    public final String INTENT_TOP_TRACKS = "top tracks";
 
     public ListFragment() {
     }
@@ -38,6 +41,7 @@ public class ListFragment extends Fragment{
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         listView = (ListView)rootView.findViewById(R.id.artist_listview);
         EditText editText = (EditText)rootView.findViewById(R.id.artist_search_text);
+
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -61,6 +65,9 @@ public class ListFragment extends Fragment{
                 Toast.makeText(getActivity(), ("Clicked on position " + position), Toast.LENGTH_SHORT).show();
                 inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
+                Intent topTrackIntent = new Intent(getActivity(), TopTrackActivity.class);
+                topTrackIntent.putExtra(INTENT_TOP_TRACKS, artist_ID[position]);
+                startActivity(topTrackIntent);
             }
         });
 
@@ -89,12 +96,14 @@ public class ListFragment extends Fragment{
                 super.onPostExecute(artistsPager);
 
                 ArtistsPager artistResult = (ArtistsPager) artistsPager;
-
                 int size = artistResult.artists.items.size();
+
                 if(size > 0){
                     String[] artistName = new String[size];
                     String[] artistAlbumArt = new String[size];
+                    String[] tempID = new String[size];
                     for(int i = 0; i < size; i ++){
+                        tempID[i] = artistResult.artists.items.get(i).id;
                         artistName[i] = artistResult.artists.items.get(i).name;
                         if(artistResult.artists.items.get(i).images.size() != 0){
                             artistAlbumArt[i] = artistResult.artists.items.get(i).images.get(0).url;
@@ -103,6 +112,7 @@ public class ListFragment extends Fragment{
                             artistAlbumArt[i] = null;
                         }
                     }
+                    artist_ID = tempID;
                     mArtistAdapter = new ArtistListAdapter(getActivity(), artistName, artistAlbumArt);
                     listView.setAdapter(mArtistAdapter);
                 }
