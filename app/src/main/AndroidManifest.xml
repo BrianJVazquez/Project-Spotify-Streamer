@@ -20,8 +20,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TopTrackActivity"
-            android:label="@string/title_activity_top_track" >
+            android:name=".TopTracksMainActivity"
+            android:label="@string/title_activity_top_tracks_main">
         </activity>
     </application>
 

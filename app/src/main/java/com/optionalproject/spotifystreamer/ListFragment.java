@@ -2,7 +2,6 @@ package com.optionalproject.spotifystreamer;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -65,9 +64,7 @@ public class ListFragment extends Fragment{
                 Toast.makeText(getActivity(), ("Clicked on position " + position), Toast.LENGTH_SHORT).show();
                 inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
                         InputMethodManager.HIDE_NOT_ALWAYS);
-                Intent topTrackIntent = new Intent(getActivity(), TopTrackActivity.class);
-                topTrackIntent.putExtra(INTENT_TOP_TRACKS, artist_ID[position]);
-                startActivity(topTrackIntent);
+                ((CallBack) getActivity()).onItemClick(INTENT_TOP_TRACKS, artist_ID[position]);
             }
         });
 
@@ -86,9 +83,8 @@ public class ListFragment extends Fragment{
                 }
                 SpotifyApi api = new SpotifyApi();
                 SpotifyService spotify = api.getService();
-                ArtistsPager results = spotify.searchArtists(params[0]);
 
-                return results;
+                return spotify.searchArtists(params[0]);
             }
 
             @Override
@@ -105,7 +101,8 @@ public class ListFragment extends Fragment{
                     for(int i = 0; i < size; i ++){
                         tempID[i] = artistResult.artists.items.get(i).id;
                         artistName[i] = artistResult.artists.items.get(i).name;
-                        if(artistResult.artists.items.get(i).images.size() != 0){
+                        int imageSize = artistResult.artists.items.get(i).images.size();
+                        if (imageSize > 0) {
                             artistAlbumArt[i] = artistResult.artists.items.get(i).images.get(0).url;
                         }
                         else {
@@ -122,4 +119,8 @@ public class ListFragment extends Fragment{
                 }
             }
         }
+
+    public interface CallBack {
+        void onItemClick(String key, String id);
+    }
 }
